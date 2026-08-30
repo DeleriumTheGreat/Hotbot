@@ -1,0 +1,90 @@
+<Interface xmlns:xsi="http://wutf-8.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../Interface.xsd">
+	<Windows>
+
+		<!--
+			HotbotFrame – compact HoT tracker bar.
+			Child window names resolve to:
+			  HotbotFrameBackground
+			  HotbotFrameSpellIcon
+			  HotbotFrameTargetName
+			  HotbotFrameTimer
+			  HotbotFrameSource
+		-->
+		<Window name="HotbotFrame" layer="background" handleinput="true" scale="1.0" savesettings="true" movable="false">
+			<EventHandlers>
+				<EventHandler event="OnLButtonUp" function="Hotbot.OnButtonClick" />
+			</EventHandlers>
+			<Size>
+				<AbsPoint x="240" y="104" />
+			</Size>
+			<Anchors>
+				<Anchor point="bottomright" relativePoint="left" relativeTo="Root">
+					<AbsPoint x="-500" y="-500" />
+				</Anchor>
+			</Anchors>
+			<Windows>
+
+				<!-- Background frame -->
+				<Window name="$parentBackground" inherits="EA_Window_DefaultBackgroundFrame" handleinput="false">
+					<Anchors>
+						<Anchor point="topleft"     relativePoint="topleft"     relativeTo="$parent" />
+						<Anchor point="bottomright" relativePoint="bottomright" relativeTo="$parent" />
+					</Anchors>
+				</Window>
+
+				<!-- HoT spell icon (50x50, top-left corner) -->
+				<DynamicImage name="$parentSpellIcon" texture="EA_TintableImage" handleinput="false">
+					<Size>
+						<AbsPoint x="50" y="50" />
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft" relativeTo="$parent">
+							<AbsPoint x="10" y="18" />
+						</Anchor>
+					</Anchors>
+				</DynamicImage>
+
+				<!-- Target name – who needs the HoT next -->
+				<Label name="$parentTargetName" font="font_clear_small_bold" maxchars="14" textalign="left" handleinput="false">
+					<Color r="255" g="255" b="255" a="255" />
+					<Size>
+						<AbsPoint x="155" y="20" />
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft" relativeTo="$parent">
+							<AbsPoint x="72" y="14" />
+						</Anchor>
+					</Anchors>
+				</Label>
+
+				<!-- Time remaining on the current HoT (mm:ss) -->
+				<Label name="$parentTimer" font="font_clear_small" maxchars="5" textalign="left" handleinput="false">
+					<Color r="255" g="255" b="255" a="255" />
+					<Size>
+						<AbsPoint x="60" y="18" />
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft" relativeTo="$parent">
+							<AbsPoint x="72" y="40" />
+						</Anchor>
+					</Anchors>
+				</Label>
+
+				<!-- Source indicator: [Self] / [Group] / [Warband] -->
+				<Label name="$parentSource" font="font_clear_tiny" maxchars="10" textalign="left" handleinput="false">
+					<Color r="180" g="180" b="180" a="255" />
+					<Size>
+						<AbsPoint x="90" y="16" />
+					</Size>
+					<Anchors>
+						<Anchor point="topleft" relativePoint="topleft" relativeTo="$parent">
+							<AbsPoint x="72" y="64" />
+						</Anchor>
+					</Anchors>
+				</Label>
+
+			</Windows>
+		</Window>
+
+	</Windows>
+</Interface>

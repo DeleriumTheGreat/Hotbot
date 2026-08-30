@@ -1,0 +1,91 @@
+Hotbot Changelog
+================
+
+Version 1.2.1 - 30 August 2026
+--------------------------------
+
+- Added HotbotConfig.LowestHealthThreshold, defaulting to 95 percent.
+- Made lowestHealth skip candidates at or above that threshold so target
+  selection continues through the remaining configured priorities.
+
+Version 1.2.0 - 17 August 2026
+--------------------------------
+
+- Added a scan-scoped cache for map distances, warband/scenario rosters,
+  group buffs, unit effects, and learned-ability checks.
+- Reused category results within each ability scan so lowest-health, DPS,
+  emergency, and configured priority passes no longer repeat identical work.
+- Cached ability icon lookups instead of rebuilding the standard ability table
+  whenever the recommended ability changes.
+- Avoided rewriting unchanged labels, icon textures, and tints every scan.
+- Stopped manual-target lock from issuing protected disarm calls every rendered
+  frame; the button is now disarmed once when the lock is acquired.
+- Kept all scan caches limited to one target-selection pass so health, range,
+  and effect information refreshes normally on the next scan.
+
+Version 1.1.9 - 16 August 2026
+--------------------------------
+
+- Stopped group members with missing distance data from being treated as in
+  range.
+- Stopped map points with missing distance data from being converted to zero
+  distance.
+- Added client target validation for the current-friendly-target fallback.
+- Applied strict known-distance checks consistently to group DPS and warband
+  leaders.
+- Reduced the default maximum recommendation distance from 110 to 95 feet to
+  avoid stale or rounded positions at the normal 100-foot range boundary.
+
+Version 1.1.8 - 16 August 2026
+--------------------------------
+
+- Manual friendly-target selections now take ownership away from Hotbot.
+- Hotbot disarms and pauses while a manually selected player is being healed
+  or resurrected, then resumes only after an explicit Hotbot click or macro.
+- Disabled delayed automatic target clearing by default.
+- Changed Hotbot.HoT() to perform exactly one action per invocation: select on
+  the first invocation and cast on the second.
+- Removed the old delayed macro retry/cast loop that could act after the
+  original input.
+- Added a "Manual target" status to the Hotbot window.
+
+Version 1.1.6 - 15 August 2026
+--------------------------------
+
+- Fixed Core.lua failing to load after version 1.1.5 exceeded Lua 5.1's limit
+  of 200 active top-level local variables.
+- Retained the cast-event cooldown synchronization introduced in 1.1.5 while
+  moving its state outside the constrained local-variable scope.
+- Leaping Alteration cooldown tracking now responds to PLAYER_BEGIN_CAST and
+  PLAYER_END_CAST, including successful, interrupted, and externally cast uses.
+
+Version 1.1.5 - 15 August 2026
+--------------------------------
+
+- Added cast-event synchronization for Leaping Alteration.
+- This version did not load because Core.lua exceeded Lua 5.1's local-variable
+  limit. Superseded by version 1.1.6.
+
+Version 1.1.4 - 15 August 2026
+--------------------------------
+
+- Accounted for Leaping Alteration's one-second cast before its ten-second
+  cooldown.
+- Avoided stationary-only roster scans while the player is moving.
+- Removed a duplicate Leaping Alteration target scan.
+- Added a short retry backoff when no damaged target is available.
+
+Version 1.1.3 - 15 August 2026
+--------------------------------
+
+- Added castOnCooldown ability priority.
+- Configured Leaping Alteration to receive a full target-priority pass whenever
+  ready while retaining requiresStationary and requiresDamagedTarget.
+
+Version 1.1.2 - 15 August 2026
+--------------------------------
+
+- Prevented delayed post-cast target cleanup from overriding a newly selected
+  manual friendly target.
+- Cancelled pending target/apply automation when a manual selection was
+  detected.
