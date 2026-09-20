@@ -149,11 +149,12 @@ HotbotConfig.EmergencyAbilitiesByCareer =
 
 --
 
--- Layered coverage: Hotbot fully scans this many entries from TargetPriority
--- for Rune of Regeneration before moving to Rune of Mending, then Serenity.
--- With the default TargetPriority, 3 means self, lowestHealth, and warbandLeader.
--- Set to 0 to scan the whole priority list for Regeneration before moving on.
-HotbotConfig.LayeredTargetPriorityCount = 3;
+-- Spread the primary HoT through the whole target priority list before
+-- selecting secondary healing layers. Emergency and castOnCooldown abilities
+-- retain their separate priority passes.
+-- A positive value restricts the initial primary-HoT pass to that many entries,
+-- allowing secondary heals to delay coverage of the remaining roster.
+HotbotConfig.LayeredTargetPriorityCount = 0;
 
 -- Cooldown grace in seconds. An ability with more than this remaining cooldown
 -- is treated as unavailable and will not be selected as the active layer.

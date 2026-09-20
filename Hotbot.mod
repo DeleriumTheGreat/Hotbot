@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ModuleFile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<UiMod name="Hotbot" version="1.2.1" date="30/08/2026">
+	<UiMod name="Hotbot" version="1.2.2" date="20/09/2026">
 		<Author name="TUP" email="" />
 		<Description text="Single-button HoT applicator. Tracks HoT coverage across roster members or nearby friendly players. Per-career ability ID configured in Config.lua." />
 		<VersionSettings gameVersion="1.4.8" windowsVersion="1.0" savedVariablesVersion="1.0" />

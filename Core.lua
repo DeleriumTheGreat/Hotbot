@@ -8,7 +8,7 @@ Hotbot.ScanCache = nil;
 Hotbot.AbilityIconNums = {};
 Hotbot.RenderSignature = nil;
 
-local VERSION           = "1.2.0";
+local VERSION           = "1.2.2";
 
 local MAX_GROUP_MEMBERS = 6;
 local UPDATE_THROTTLE   = 0.25;   -- seconds between full scans
@@ -2026,7 +2026,6 @@ local function CheckDps()
 
     local function ConsiderDpsCandidate(name, effects, distance, healthPercent, isDistant, requireKnownRange)
         if (not name or name == L"" or seen[name]) then return end
-        seen[name] = true;
 
         if (name == myName) then return end
         if (IsFailedSkipped(name) or IsVerifiedCovered(name)) then return end
@@ -2036,6 +2035,10 @@ local function CheckDps()
         elseif (not IsInHotRange(distance, isDistant)) then
             return;
         end
+
+        -- A rejected group/scenario record must not hide a usable warband
+        -- record for the same player (for example, while range is updating).
+        seen[name] = true;
 
         local remaining = 0;
         if (effects) then
@@ -2289,6 +2292,85 @@ function Hotbot.DebugNearby()
     ChatPrint("Hotbot nearby debug: enabled=" .. tostring(Hotbot.IsNearbyFallbackEnabled()) .. " nearbyOnly=" .. tostring(Hotbot.IsNearbyModeEnabled()) .. " abilities=" .. GetAbilitySummary() .. " friendlyPip=" .. tostring(friendlyPip));
     ChatPrint("Hotbot nearby debug: named=" .. tostring(totalNamed) .. " accepted=" .. tostring(acceptedPips) .. " candidates=" .. tostring(inRangeCandidates) .. " self=" .. tostring(skippedSelf) .. " covered=" .. tostring(skippedCovered) .. " failed=" .. tostring(skippedFailed) .. " range=" .. tostring(skippedRange));
     ChatPrint("Hotbot nearby debug: closest=" .. tostring(closestName or "none") .. " distance=" .. tostring(closestDistance or "?") .. " types=" .. typeSummary);
+end
+
+-- Read-only snapshot: do not invoke the protected target/cast macro to
+-- diagnose an empty recommendation, or change the live selection state.
+function Hotbot.DebugCoverage()
+    if (not isLoaded or not hotAbilityId) then
+        ChatPrint("Hotbot coverage: player/abilities not loaded yet.");
+        return;
+    end
+
+    local abilityId = hotAbilityId;
+    local enabled = "unavailable";
+    if (IsAbilityEnabled) then
+        local ok, value = pcall(IsAbilityEnabled, abilityId);
+        enabled = ok and tostring(value) or "API error";
+    end
+    ChatPrint("Hotbot coverage: " .. GetAbilityLabel(abilityId)
+        .. " known=" .. tostring(Hotbot.IsAbilityKnown(abilityId))
+        .. " enabled=" .. enabled
+        .. " localCooldown=" .. tostring(abilityCooldownsRemaining[abilityId] or 0)
+        .. " nearbyMode=" .. tostring(nearbyModeEnabled)
+        .. " manualLock=" .. tostring(Hotbot.ManualTargetLock));
+    ChatPrint("Hotbot coverage: group=" .. tostring(IsCheckEnabled("GroupCheck"))
+        .. " warband=" .. tostring(IsCheckEnabled("WarbandCheck"))
+        .. " maxDistance=" .. tostring(HotbotConfig.MaxTargetDistance or BUFF_DISTANCE));
+
+    local selfEffects = GetBuffs(GameData.BuffTargetType.SELF);
+    ChatPrint("Hotbot coverage: self HoT seconds="
+        .. tostring(GetSingleHotDurationFromEffects(selfEffects, true, abilityId)));
+
+    local members = LibGroup and LibGroup.GroupMembers and LibGroup.GroupMembers.ByIndex or {};
+    local count = 0;
+    for idx = 1, MAX_GROUP_MEMBERS do
+        local member = members[idx];
+        if (member and member.IsValid) then
+            count = count + 1;
+            local name = StripRealm(member.Name);
+            local effects = GetBuffs(GameData.BuffTargetType.GROUP_MEMBER_START + idx - 1);
+            ChatPrint("Hotbot coverage: " .. tostring(name)
+                .. " career=" .. tostring(GetMemberCareerLine(member))
+                .. " dps=" .. tostring(IsDpsMember(member))
+                .. " alive=" .. tostring(member.IsAlive)
+                .. " online=" .. tostring(member.IsOnline)
+                .. " distance=" .. tostring(member.Distance)
+                .. " distant=" .. tostring(member.IsDistant)
+                .. " inRange=" .. tostring(IsInHotRange(member.Distance, member.IsDistant))
+                .. " HoT=" .. tostring(GetSingleHotDurationFromEffects(effects, false, abilityId))
+                .. " skip=" .. tostring(failedTargetSkips[name] or 0));
+        end
+    end
+    ChatPrint("Hotbot coverage: valid group entries=" .. tostring(count));
+
+    local distances = GetWarbandDistances();
+    local total, inRange, eligible = 0, 0, 0;
+    ForEachWarbandMember(Hotbot.GetScanWarbandData(), function(member)
+        local rawName = GetMemberName(member);
+        if (not rawName or rawName == L"") then return end
+        local name = StripRealm(rawName);
+        if (name == myName) then return end
+        total = total + 1;
+        if (IsDpsMember(member)) then
+            ChatPrint("Hotbot coverage: warband DPS " .. tostring(name)
+                .. " distance=" .. tostring(GetMemberDistance(member, distances, name))
+                .. " distant=" .. tostring(GetMemberDistant(member))
+                .. " online=" .. tostring(IsMemberOnline(member))
+                .. " health=" .. tostring(GetMemberHealthPercent(member, nil))
+                .. " cachedHoT=" .. tostring(IsVerifiedCovered(name, abilityId))
+                .. " skip=" .. tostring(failedTargetSkips[name] or 0));
+        end
+        if (IsInHotRange(GetMemberDistance(member, distances, name), GetMemberDistant(member))) then
+            inRange = inRange + 1;
+            if (IsMemberOnline(member) and GetMemberHealthPercent(member, nil) > 0
+                    and not IsFailedSkipped(name) and not IsVerifiedCovered(name, abilityId)) then
+                eligible = eligible + 1;
+            end
+        end
+    end);
+    ChatPrint("Hotbot coverage: warband others=" .. tostring(total)
+        .. " inRange=" .. tostring(inRange) .. " beforeBuffCheck=" .. tostring(eligible));
 end
 
 function Hotbot.DebugSelfBuffs()

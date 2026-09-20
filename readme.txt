@@ -353,14 +353,15 @@ HotbotConfig.EmergencyAbilitiesByCareer
     - 9573, Khaine's Vigor.
 
 HotbotConfig.LayeredTargetPriorityCount
-    Number of target-priority entries that must receive Rune of Regeneration
-    before Hotbot moves on to Rune of Mending, then Rune of Serenity.
+    Number of target-priority entries checked for the primary HoT before
+    Hotbot tries secondary healing layers. Applies to all configured careers.
 
-    Default: 3
+    Default: 0
 
-    With the current default TargetPriority, 3 means self, lowestHealth, and
-    warbandLeader. Set to 0 to scan the whole priority list for Regeneration
-    before moving to later Rune Priest abilities.
+    Zero scans the whole priority list for the primary HoT before moving to
+    secondary layers. A value of 3 checks self, lowestHealth, and warbandLeader
+    first, then allows secondary heals before primary HoTs on the rest of the
+    roster. Emergency and castOnCooldown abilities keep their earlier priority.
 
 HotbotConfig.CooldownReadyGrace
     Number of seconds of remaining cooldown that Hotbot treats as effectively
@@ -585,6 +586,13 @@ To make a setting permanent, edit Config.lua.
 
 Debug Commands
 --------------
+
+Hotbot.DebugCoverage()
+    Prints a read-only snapshot of primary-HoT readiness, group member range
+    and buff data, and warband range totals. Use when "All covered" appears
+    even though group members need a HoT. Does not target or cast.
+
+        /script Hotbot.DebugCoverage()
 
 Hotbot.DebugNearby()
     Prints what the nearby map scanner can see and whether nearby-only mode is

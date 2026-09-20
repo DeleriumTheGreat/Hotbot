@@ -1,6 +1,20 @@
 Hotbot Changelog
 ================
 
+Version 1.2.2 - 20 September 2026
+--------------------------------
+
+- Changed the default LayeredTargetPriorityCount from 3 to 0 so the primary
+  HoT is checked across the full target-priority list before secondary healing
+  layers. At full health, the existing self, warband leader, then DPS order
+  remains in place. Emergency and castOnCooldown abilities retain priority.
+- Fixed DPS scanning so a rejected group/scenario record no longer prevents
+  checking a usable warband record for the same player, such as when group
+  distance data is missing or still updating.
+- Added the optional, read-only Hotbot.DebugCoverage() command to report
+  primary-HoT readiness, group range/buff data, and warband DPS eligibility.
+- Updated the README and synchronized the startup version with the manifest.
+
 Version 1.2.1 - 30 August 2026
 --------------------------------
 
